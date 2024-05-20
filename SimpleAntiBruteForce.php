@@ -56,9 +56,17 @@ class SimpleAntiBruteForce
 
 		$current_time = time();
 
+		// add a new record in the db
         $stmt = $mysqli->prepare("INSERT INTO user_failed_logins (email, attempted_at, ip_adress) VALUES (?, ?, ?)");
         $stmt->bind_param("sis", $email, $current_time, $ip_adress);
         $stmt->execute();
+
+		// clean the db by removing expired attempt
+		$min_expired_timestamp = time() - 2*self::$INTERVAL_IN_S;
+        $stmt = $mysqli->prepare("DELETE FROM user_failed_logins WHERE attempted_at < ?");
+        $stmt->bind_param("i", $min_expired_timestamp);
+		$stmt->execute();
+
         $stmt->close();
         $mysqli->close();
 	}

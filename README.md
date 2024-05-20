@@ -8,6 +8,12 @@ To use it, you only need to create a MySQL table on your project following this 
 
 `user_failed_logins(id: int, email: varchar, attempted_at:int, ip_adress:varchar)`
 
+The default constants are defined as follows: **maximum 10 attempts in the last 5 minutes**.
+
+You can change these values by changing the two variables defined at the top of the file: `$MAX_FAILED_ATTEMPT` and `$INTERVAL_IN_S`.
+
+The library is designed so that the database empties itself over time.
+
 # Usage 
 
 - Call the `::isAuthorized()` method before verifying the entered password.
