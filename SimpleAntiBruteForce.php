@@ -29,12 +29,17 @@ class SimpleAntiBruteForce
 	private static int $MAX_FAILED_ATTEMPT = 10;
 	private static int $INTERVAL_IN_S = 300;
 
+	private static string $DB_HOST = "127.0.0.1";
+	private static string $DB_NAME = "db";
+	private static string $DB_USERNAME = "root";
+	private static string $DB_PASSWORD = "password";
+
 	/**
 	 * Returns `true` if the IP is allowed. Returns `false` if the IP is blocked.
 	 */
 	static function isAuthorized(string $ip_adress, string $email): bool
 	{
-		$mysqli = require($_SERVER['DOCUMENT_ROOT'] . "/includes/database.inc.php");
+		$mysqli = new mysqli(self::$DB_HOST, self::$DB_USERNAME, self::$DB_PASSWORD, self::$DB_NAME);
 
 		$timestamp_max = time() - self::$INTERVAL_IN_S;
 
@@ -52,7 +57,7 @@ class SimpleAntiBruteForce
 	 */
 	static function addFailedAttempt(string $ip_adress, string $email): void
 	{
-		$mysqli = require($_SERVER['DOCUMENT_ROOT'] . "/includes/database.inc.php");
+		$mysqli = new mysqli(self::$DB_HOST, self::$DB_USERNAME, self::$DB_PASSWORD, self::$DB_NAME);
 
 		$current_time = time();
 
