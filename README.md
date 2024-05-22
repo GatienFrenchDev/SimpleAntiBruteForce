@@ -1,12 +1,19 @@
-# 🔐 SimpleAntiBruteForce
+# SimpleAntiBruteForce - PHP Library
 
 Small library to manage brute force attempts on a PHP form.
 
-Didn't find a library that offered a correct and simple system.
+I couldn't find a library offering a correct and simple system so I made one myself
 
 To use it, you only need to create a MySQL table on your project following this data model:
 
-`user_failed_logins(id: int, email: varchar, attempted_at:int, ip_adress:varchar)`
+```sql
+CREATE TABLE user_failed_logins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    attempted_at INT NOT NULL,
+    ip_address VARCHAR(45) NOT NULL
+);
+```
 
 The default constants are defined as follows: **maximum 10 attempts in the last 5 minutes**.
 
@@ -15,6 +22,8 @@ You can change these values by changing the two variables defined at the top of 
 The library is designed so that the database empties itself over time.
 
 # Usage 
+
+- Define MySQL credentials ($DB_HOST, $DB_NAME, $DB_USERNAME, $DB_PASSWORD) at the top of the file.
 
 - Call the `::isAuthorized()` method before verifying the entered password.
 
