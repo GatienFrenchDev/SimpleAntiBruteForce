@@ -1,10 +1,18 @@
 # SimpleAntiBruteForce - PHP Library
 
-Small library to manage brute force attempts on a PHP form.
+SimpleAntiBruteForce is a lightweight PHP library designed to mitigate brute force attacks on PHP forms effectively.
 
-I couldn't find a library offering a correct and simple system so I made one myself
+## Overview
 
-To use it, you only need to create a MySQL table on your project following this data model:
+Many existing libraries lack a straightforward and robust system for managing brute force attempts, prompting the creation of SimpleAntiBruteForce.
+
+This library provides a reliable solution without unnecessary complexity and is designed to optimize resource usage by automatically clearing old records from the database over time.
+
+## Setup the library
+
+Setting up **SimpleAntiBruteForce** is very simple.
+
+- Simply create a new MySQL table in your project with the following schema:
 
 ```sql
 CREATE TABLE user_failed_logins (
@@ -15,40 +23,29 @@ CREATE TABLE user_failed_logins (
 );
 ```
 
-The default constants are defined as follows: **maximum 10 attempts in the last 5 minutes**.
+- And define your MySQL credentials in the library file. You can also adjust the default settings of maximum attempts and time interval by modifying the designated variables in the file.
 
-You can change these values by changing the two variables defined at the top of the file: `$MAX_FAILED_ATTEMPT` and `$INTERVAL_IN_S`.
+## Usage
 
-The library is designed so that the database empties itself over time.
+### IP Check
+Before verifying passwords, ensure that the IP address is not blocked by calling the `::isAuthorized()` method.
 
-# Usage 
-
-- Define MySQL credentials ($DB_HOST, $DB_NAME, $DB_USERNAME, $DB_PASSWORD) at the top of the file.
-
-- Call the `::isAuthorized()` method before verifying the entered password.
-
-Exemple :
 ```php
-// checking that the IP is not blocked
 if(!SimpleAntiBruteForce::isAuthorized($ip, $email)){
     http_response_code(429);
     die("Too many connection attempts... Retry later");
 }
-
 ```
+### Record Failed Attempts
+When a login attempt fails, record it using the `::addFailedAttempt()` method.
 
-- Call the `::addFailedAttempt()` method when a connection fails in order to remember it.
 ```php
-// if the password entered is the correct one
 if (password_verify($password, $user_details["hash_password"])) {
     header("Location: /dashboard");
-}
-// if the password entered is incorrect
-else {
-    // we record using the library that a connection attempt has failed
+} else {
     SimpleAntiBruteForce::addFailedAttempt($ip, $email);
 }
 ```
 
-
-For any questions, contact me by email.
+## Contact
+For questions or support, feel free to contact me via email at <contact@gatiendev.fr>.
