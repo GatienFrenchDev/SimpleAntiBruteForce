@@ -1,4 +1,9 @@
 <?php
+
+namespace SimpleAntiBruteForce;
+
+use App\Entities\Database;
+
 /**
  *
  * SimpleAntiBruteForce - https://github.com/gatienfrenchdev/SimpleAntiBruteForce
@@ -29,50 +34,50 @@ class SimpleAntiBruteForce
 	private static int $MAX_FAILED_ATTEMPT = 10;
 	private static int $INTERVAL_IN_S = 300;
 
-	private static string $DB_HOST = "127.0.0.1";
-	private static string $DB_NAME = "db";
-	private static string $DB_USERNAME = "root";
-	private static string $DB_PASSWORD = "password";
-
 	/**
-	 * Returns `true` if the IP is allowed. Returns `false` if the IP is blocked.
+	 * To check if the IP is allowed to connect.
+	 * @param string $ip_adress The IP address of the user.
+	 * @param string $email The email of the user.
+	 * @return bool `true` if the user is allowed to connect, `false` otherwise.
 	 */
 	static function isAuthorized(string $ip_adress, string $email): bool
 	{
-		$mysqli = new mysqli(self::$DB_HOST, self::$DB_USERNAME, self::$DB_PASSWORD, self::$DB_NAME);
+		$mysqli = Database::getInstance();
 
 		$timestamp_max = time() - self::$INTERVAL_IN_S;
 
-        $stmt = $mysqli->prepare("SELECT COUNT(id) as nb FROM user_failed_logins WHERE email = ? AND ip_adress = ? AND attempted_at > ?");
-        $stmt->bind_param("ssi", $email, $ip_adress, $timestamp_max);
-        $stmt->execute();
-        $res = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-        $stmt->close();
-        $mysqli->close();
-        return $res[0]["nb"] < self::$MAX_FAILED_ATTEMPT;
+		$stmt = $mysqli->prepare("SELECT COUNT(id) as nb FROM user_failed_logins WHERE email = ? AND ip_adress = ? AND attempted_at > ?");
+		$stmt->bind_param("ssi", $email, $ip_adress, $timestamp_max);
+		$stmt->execute();
+		$res = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+		$stmt->close();
+
+		return $res[0]["nb"] < self::$MAX_FAILED_ATTEMPT;
 	}
 
 	/**
-	 * To add a new failed connection attempt.
+	 * To add a failed attempt in the database.
+	 * @param string $ip_adress The IP address of the user.
+	 * @param string $email The email of the user.
+	 * @return void
 	 */
 	static function addFailedAttempt(string $ip_adress, string $email): void
 	{
-		$mysqli = new mysqli(self::$DB_HOST, self::$DB_USERNAME, self::$DB_PASSWORD, self::$DB_NAME);
+		$mysqli = Database::getInstance();
 
 		$current_time = time();
 
 		// add a new record in the db
-        $stmt = $mysqli->prepare("INSERT INTO user_failed_logins (email, attempted_at, ip_adress) VALUES (?, ?, ?)");
-        $stmt->bind_param("sis", $email, $current_time, $ip_adress);
-        $stmt->execute();
-
-		// clean the db by removing expired attempt
-		$min_expired_timestamp = time() - 2*self::$INTERVAL_IN_S;
-        $stmt = $mysqli->prepare("DELETE FROM user_failed_logins WHERE attempted_at < ?");
-        $stmt->bind_param("i", $min_expired_timestamp);
+		$stmt = $mysqli->prepare("INSERT INTO user_failed_logins (email, attempted_at, ip_adress) VALUES (?, ?, ?)");
+		$stmt->bind_param("sis", $email, $current_time, $ip_adress);
 		$stmt->execute();
 
-        $stmt->close();
-        $mysqli->close();
+		// clean the db by removing expired attempt
+		$min_expired_timestamp = time() - 2 * self::$INTERVAL_IN_S;
+		$stmt = $mysqli->prepare("DELETE FROM user_failed_logins WHERE attempted_at < ?");
+		$stmt->bind_param("i", $min_expired_timestamp);
+		$stmt->execute();
+
+		$stmt->close();
 	}
 }
