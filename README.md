@@ -16,9 +16,9 @@ Setting up **SimpleAntiBruteForce** is very simple.
 
 ```sql
 CREATE TABLE user_failed_logins (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
-    attempted_at INT NOT NULL,
+    attempted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     ip_address VARCHAR(45) NOT NULL
 );
 ```
