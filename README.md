@@ -31,6 +31,8 @@ CREATE TABLE user_failed_logins (
 Before verifying passwords, ensure that the IP address is not blocked by calling the `::isAuthorized()` method.
 
 ```php
+use SimpleAntiBruteForce;
+// ...
 if(!SimpleAntiBruteForce::isAuthorized($ip, $email)){
     http_response_code(429);
     die("Too many connection attempts... Retry later");
@@ -40,6 +42,8 @@ if(!SimpleAntiBruteForce::isAuthorized($ip, $email)){
 When a login attempt fails, record it using the `::addFailedAttempt()` method.
 
 ```php
+use SimpleAntiBruteForce;
+// ...
 if (password_verify($password, $user_details["hash_password"])) {
     header("Location: /dashboard");
 } else {
